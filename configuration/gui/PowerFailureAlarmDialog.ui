@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PowerFailureAlarm</class>
+ <widget class="QDialog" name="PowerFailureAlarm">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>448</width>
+    <height>551</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QToolBox" name="toolBox">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>10</y>
+     <width>341</width>
+     <height>281</height>
+    </rect>
+   </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <widget class="QWidget" name="page">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>331</width>
+      <height>190</height>
+     </rect>
+    </property>
+    <attribute name="label">
+     <string>Contacts</string>
+    </attribute>
+    <widget class="QTableWidget" name="tableWidget">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>331</width>
+       <height>192</height>
+      </rect>
+     </property>
+     <column>
+      <property name="text">
+       <string>Id</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Name</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Number</string>
+      </property>
+     </column>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="page_2">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>331</width>
+      <height>190</height>
+     </rect>
+    </property>
+    <attribute name="label">
+     <string>Settings</string>
+    </attribute>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>281</width>
+       <height>56</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLabel" name="delay_label">
+          <property name="text">
+           <string>Delay</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="delaySlider">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLCDNumber" name="lcdNumber"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QLabel" name="failureCount_label">
+          <property name="text">
+           <string>Failure Count</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLCDNumber" name="lcdNumber_2"/>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="page_3">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>331</width>
+      <height>190</height>
+     </rect>
+    </property>
+    <attribute name="label">
+     <string>Status</string>
+    </attribute>
+    <widget class="QWidget" name="">
+     <property name="geometry">
+      <rect>
+       <x>51</x>
+       <y>31</y>
+       <width>221</width>
+       <height>111</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="phoneConnectedlabel">
+          <property name="text">
+           <string>Phone Status</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLed" name="phoneStatusOkLed">
+          <property name="maximumSize">
+           <size>
+            <width>32</width>
+            <height>32</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Binary Led</string>
+          </property>
+          <property name="whatsThis">
+           <string>Led widget</string>
+          </property>
+          <property name="value">
+           <bool>false</bool>
+          </property>
+          <property name="onColor">
+           <enum>QLed::Green</enum>
+          </property>
+          <property name="offColor">
+           <enum>QLed::Grey</enum>
+          </property>
+          <property name="shape">
+           <enum>QLed::Circle</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLed" name="phoneStatusWarningLed_2">
+          <property name="maximumSize">
+           <size>
+            <width>32</width>
+            <height>32</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Binary Led</string>
+          </property>
+          <property name="whatsThis">
+           <string>Led widget</string>
+          </property>
+          <property name="value">
+           <bool>false</bool>
+          </property>
+          <property name="onColor">
+           <enum>QLed::Orange</enum>
+          </property>
+          <property name="offColor">
+           <enum>QLed::Grey</enum>
+          </property>
+          <property name="shape">
+           <enum>QLed::Circle</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLed" name="phoneStatusNokLed_3">
+          <property name="maximumSize">
+           <size>
+            <width>32</width>
+            <height>32</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Binary Led</string>
+          </property>
+          <property name="whatsThis">
+           <string>Led widget</string>
+          </property>
+          <property name="value">
+           <bool>false</bool>
+          </property>
+          <property name="onColor">
+           <enum>QLed::Red</enum>
+          </property>
+          <property name="offColor">
+           <enum>QLed::Grey</enum>
+          </property>
+          <property name="shape">
+           <enum>QLed::Circle</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QLabel" name="powerlabel">
+          <property name="text">
+           <string>Power</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLed" name="phoneStatusOkLed_2">
+          <property name="maximumSize">
+           <size>
+            <width>32</width>
+            <height>32</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Binary Led</string>
+          </property>
+          <property name="whatsThis">
+           <string>Led widget</string>
+          </property>
+          <property name="value">
+           <bool>false</bool>
+          </property>
+          <property name="onColor">
+           <enum>QLed::Green</enum>
+          </property>
+          <property name="offColor">
+           <enum>QLed::Grey</enum>
+          </property>
+          <property name="shape">
+           <enum>QLed::Circle</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLed" name="phoneStatusNokLed_4">
+          <property name="maximumSize">
+           <size>
+            <width>32</width>
+            <height>32</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Binary Led</string>
+          </property>
+          <property name="whatsThis">
+           <string>Led widget</string>
+          </property>
+          <property name="value">
+           <bool>false</bool>
+          </property>
+          <property name="onColor">
+           <enum>QLed::Red</enum>
+          </property>
+          <property name="offColor">
+           <enum>QLed::Grey</enum>
+          </property>
+          <property name="shape">
+           <enum>QLed::Circle</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="actionBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>340</y>
+     <width>371</width>
+     <height>171</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Actions</string>
+   </property>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>40</y>
+      <width>291</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QPushButton" name="readButton">
+         <property name="text">
+          <string>&amp;read</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="writeButton">
+         <property name="text">
+          <string>&amp;write</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QProgressBar" name="progressBar">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="value">
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QLed</class>
+   <extends>QWidget</extends>
+   <header>qled.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../resources/qled.qrc"/>
+ </resources>
+ <connections/>
+</ui>
