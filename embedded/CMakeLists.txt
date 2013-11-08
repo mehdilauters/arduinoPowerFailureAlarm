@@ -3,7 +3,7 @@
 # reade README.rst.
 # https://github.com/queezythegreat/arduino-cmake
 
-
+set(ARDUINO_SDK_PATH /home/mehdi/Mehdi/programmation/arduino/arduino-1.0.5/arduino-1.0.5/)
 
 
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/cmake/ArduinoToolchain.cmake) # Arduino Toolchain
@@ -22,8 +22,14 @@ print_programmer_list()
 
 set(FIRMWARE_NAME PowerFailureAlarm)
 
-set(ARDUINO_DEFAULT_BOARD uno) # Default Board ID, when not specified
-set(ARDUINO_DEFAULT_PORT /dev/ttyACM0) # Default Port, when not specified
+execute_process(COMMAND find /dev/ -name ttyACM* 
+				 COMMAND tr -d '\n'
+                OUTPUT_VARIABLE serialPort)
+
+Message("Serial port " ${serialPort} " will be used")
+
+set(ARDUINO_DEFAULT_BOARD micro) # Default Board ID, when not specified
+set(ARDUINO_DEFAULT_PORT ${serialPort}) # Default Port, when not specified
 set(${FIRMWARE_NAME}_SERIAL "cat @INPUT_PORT@")
 
 
@@ -32,7 +38,10 @@ set (LIBRARIES_PATH "/usr/share/arduino/libraries")
 
 include_directories(
 	inc
+	../lib/Settings/inc
 )
+
+add_definitions("-Dboard_${ARDUINO_DEFAULT_BOARD}")
 
 #====================================================================#
 # Advanced static library exmaple
@@ -50,8 +59,16 @@ include_directories(
 #
 #generate_arduino_library(blink_lib)
 message(${LIBRARIES_PATH}/EEPROM/EEPROM.cpp)
-FILE( GLOB source_files_PowerFailureAlarm ./src/*.cpp "./src/*.c" ${LIBRARIES_PATH}/EEPROM/EEPROM.cpp
+FILE( GLOB source_files_PowerFailureAlarm ../lib/Settings/src/*.cpp ./src/*.cpp ./src/*.c ${LIBRARIES_PATH}/EEPROM/EEPROM.cpp
 )
+message(${source_files_PowerFailureAlarm})
+
+
+ ADD_CUSTOM_TARGET(
+        findPort COMMAND
+        COMMAND find /dev/ -name ttyACM* 
+				 COMMAND tr -d '\n'
+                OUTPUT_VARIABLE serialPort) 
 
 
 #====================================================================#
@@ -59,7 +76,8 @@ FILE( GLOB source_files_PowerFailureAlarm ./src/*.cpp "./src/*.c" ${LIBRARIES_PA
 #====================================================================#
 generate_arduino_firmware(PowerFailureAlarm
     SRCS ${source_files_PowerFailureAlarm}
-    BOARD uno)
+    BOARD ${ARDUINO_DEFAULT_BOARD}
+    )
 
 # Alternative: by variables
 #set(blink_SRCS blink.cpp)

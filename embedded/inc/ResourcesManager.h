@@ -10,23 +10,24 @@
 
 
 #include "PowerFailureAlarm.h"
-class Contact;
+class EmbeddedSettings;
+class Nokia3310;
+class Led;
+class Logger;
 
 class ResourcesManager {
 private:
-	int m_powerFailureDelay;
-	int m_powerFailureCount;
+	Stream *m_fbusIo;
+	Stream *m_logIo;
+	Logger *m_logger;
+	EmbeddedSettings * m_settings;
+	Nokia3310 * m_nokia;
+	Led * m_statusLed;
 	int m_lastPowerTime;
 	bool m_raised;
-	Contact *m_contactList[CONTACT_MAX_COUNT];
 public:
 	ResourcesManager();
-	void setPowerFailureDelay(int _delay);
-	void setPowerFailureCount(int _count);
-	void save(bool _all = false);
-	void load(void);
 
-	Contact **getContactList(void);
 	bool isPowered(void);
 
 	bool powerFailure(void);
@@ -34,11 +35,24 @@ public:
 	bool getRaised();
 	void raised();
 
+	Nokia3310 * getNokia();
+	Led * getStatusLed();
+
+	float getPowerVoltage();
+
 	void testRw(void);
 	void print();
 	void update();
+	EmbeddedSettings * getSettings();
+	Logger *getLogger();
+
+	Stream * getLogIo();
+	void sendAlert();
+	void sendSms(String _message, bool _start = false);
+	Stream * getFbusIo();
 
 	virtual ~ResourcesManager();
 };
+
 
 #endif /* RESOURCESMANAGER_H_ */

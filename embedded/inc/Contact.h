@@ -8,9 +8,8 @@
 #ifndef CONTACT_H_
 #define CONTACT_H_
 #include "PowerFailureAlarm.h"
+#include "PowerFailureAlarmComon.h"
 
-#define CONTACT_MAX_NAME_SIZE 10
-#define CONTACT_MAX_NUMBER_SIZE 12
 #define CONTACT_MAX_SIZE (CONTACT_MAX_NAME_SIZE + CONTACT_MAX_NUMBER_SIZE)
 
 class Contact {
@@ -23,8 +22,7 @@ public:
 	String getName();
 	String getNumber();
 	void save(void);
-	void load(void);
-	void unload(void);
+	bool load(void);
 	void print();
 	static void testRw();
 

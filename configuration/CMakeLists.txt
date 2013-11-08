@@ -5,11 +5,12 @@ FIND_PACKAGE(Qt4 REQUIRED)
 #Include repertories
 INCLUDE_DIRECTORIES(
     inc
+    ../lib/Settings/inc
 	${QT_INCLUDES}
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
-FILE( GLOB source_files_config ./src/*.cpp )
+FILE( GLOB source_files_config ../lib/Settings/src/*.cpp ./src/*.cpp )
 FILE( GLOB IHM_SOURCES src/*.cpp )
 FILE( GLOB IHM_HEADERS inc/*.h )
 FILE( GLOB IHM_UI gui/*.ui )
@@ -24,6 +25,6 @@ QT4_WRAP_CPP(IHM_HEADERS_MOC ${IHM_HEADERS})
 
 INCLUDE(${QT_USE_FILE})
 ADD_DEFINITIONS(${QT_DEFINITIONS})
-set(QT_LIBRARIES ${QT_LIBRARIES} QtSvg)
+set(QT_LIBRARIES ${QT_LIBRARIES} QtSvg QtSerialPort)
 add_executable( PowerFailureAlarmConfig ${IHM_SOURCES} ${IHM_HEADERS_MOC} ${SOURCES_UI_HEADERS} ${source_files_config} ${QtApp_RCC_SRCS} )
 target_link_libraries (PowerFailureAlarmConfig ${QT_LIBRARIES} )

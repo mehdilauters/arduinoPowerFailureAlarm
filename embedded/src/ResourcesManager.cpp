@@ -6,130 +6,221 @@
  */
 
 #include "ResourcesManager.h"
-#include "Tools.h"
+#include "EmbeddedSettings.h"
 #include "Contact.h"
+#include "Nokia3310.h"
+#include "Led.h"
+#include "Logger.h"
+
+#define MODULE_ID 10
+#define SIGNAL_ID_VOLTAGE 0
+
 
 ResourcesManager::ResourcesManager() {
-	pinMode(PIN_POWER, INPUT);
-	this->m_powerFailureDelay = 0;
-	this->m_powerFailureCount = 0;
-	this->m_lastPowerTime = 0;
-	this->m_raised = false;
+
+  this->m_logIo = &Serial;
+  #ifdef board_micro
+    ((Serial_*)this->m_logIo)->begin(FBUS_BAUDRATE);
+    this->m_fbusIo = &Serial1;
+    ((HardwareSerial*)this->m_fbusIo)->begin(FBUS_BAUDRATE);
+  #else
+    #ifdef LOGGER_DEBUG
+      ((HardwareSerial*)this->m_logIo)->begin(FBUS_BAUDRATE);
+      this->m_fbusIo = this->m_logIo;
+    #endif
+  #endif
+
+  this->m_statusLed = new Led(PIN_LED, false);
+
+
+  this->m_logger = new Logger(this->m_logIo, LOG_LEVEL_VERBOSE);
+
+  while(! this->m_logger->ready() )
+  {
+    this->getStatusLed()->on();
+    delay(500);
+    this->getStatusLed()->off();
+    delay(100);
+  }
+  INFO("Starting logging");
+
+  pinMode(PIN_MAIN_POWER, INPUT);
+  pinMode(PIN_POWER_LEVEL, INPUT);
+
+
+  this->m_nokia = new Nokia3310(this);
+
+  this->m_lastPowerTime = 0;
+  this->m_raised = false;
+  this->m_settings = new EmbeddedSettings(this);
+  this->getSettings()->load();
 }
 
-void ResourcesManager::save(bool _all)
+Stream * ResourcesManager::getLogIo()
 {
-	Tools::EEPROMwriteInt(RESOURCES_OFFSET, this->m_powerFailureDelay);
-	Tools::EEPROMwriteInt(RESOURCES_OFFSET + sizeof(int), this->m_powerFailureCount);
-	if(_all)
-	{
-		for(int i=0; i < CONTACT_MAX_COUNT; i++)
-			{
-				this->m_contactList[i]->save();
-			}
-	}
+  return this->m_logIo;
 }
 
-
-void ResourcesManager::load(void)
+Nokia3310 * ResourcesManager::getNokia()
 {
-	this->m_powerFailureDelay = Tools::EEPROMreadInt(RESOURCES_OFFSET);
-	this->m_powerFailureCount = Tools::EEPROMreadInt(RESOURCES_OFFSET + sizeof(int));
-
-	for(int i=0; i < CONTACT_MAX_COUNT; i++)
-	{
-		this->m_contactList[i] = new Contact(i);
-	}
+  return this->m_nokia;
 }
 
-void ResourcesManager::testRw(void)
+Led * ResourcesManager::getStatusLed()
 {
-	this->m_powerFailureCount = 10;
-	this->m_powerFailureDelay = 200;
+  return this->m_statusLed;
+}
 
-	this->save();
+float ResourcesManager::getPowerVoltage()
+{
+  int  powerLevel = analogRead(PIN_POWER_LEVEL);
+  float volts = (powerLevel / POWER_LEVEL_FACTOR) * REFERENCE_VOLT *2 *2 ;
+//  this->getLogger()->debug("power level "+ String(powerLevel));
+  //this->getLogger()->log(volts , SIGNAL_ID_VOLTAGE, LOG_LEVEL_DEBUG);
 
-	Contact::testRw();
-
-	this->m_powerFailureCount = 0;
-	this->m_powerFailureDelay = 0;
-
-
-	this->load();
-
-	this->print();
-
+  return volts;
 }
 
 void ResourcesManager::print()
 {
-	Serial.println("*******ResourcesManager****");
-	Serial.println("Count => "+ String(this->m_powerFailureCount));
-	Serial.println("Delay => "+ String(this->m_powerFailureDelay));
+  INFO("ResourcesManager::print");
+  float powerLevel = this->getPowerVoltage();
+  INFO("power level "+ String((int)powerLevel));
+  INFO("isPowered "+ String(this->isPowered()));
+  INFO("isRaised "+ String(this->m_raised));
+  INFO("Nokia Status "+ String(this->getNokia()->ready()));
+  INFO("Led Status "+ String(this->getStatusLed()->getState()));
+  this->m_settings->print();
 }
+
+EmbeddedSettings * ResourcesManager::getSettings()
+{
+  return this->m_settings;
+}
+
+Logger *ResourcesManager::getLogger()
+{
+  return this->m_logger;
+}
+
 
 bool ResourcesManager::getRaised()
 {
-	return this->m_raised;
+  return this->m_raised;
 }
 
 void ResourcesManager::raised()
 {
-	this->m_raised = true;
-	this->m_powerFailureCount++;
+  INFO("Raising power failure");
+  this->m_raised = true;
+  this->m_settings->countFailure();
 }
 
-void ResourcesManager::setPowerFailureDelay(int _delay)
-{
-	this->m_powerFailureDelay = _delay;
-}
 
-void ResourcesManager::setPowerFailureCount(int _count)
-{
-	this->m_powerFailureCount = _count;
-}
 
 bool ResourcesManager::isPowered(void)
 {
-	return digitalRead(PIN_POWER) == 1;
+  return digitalRead(PIN_MAIN_POWER) == 1;
 }
 
 void ResourcesManager::update()
 {
-	if(this->isPowered())
-	{
-		this->m_lastPowerTime = millis();
-		this->m_raised = false;
-	}
+  if(this->isPowered())
+  {
+    this->m_lastPowerTime = millis();
+    this->m_raised = false;
+  }
 }
 
 bool ResourcesManager::powerFailure(void)
 {
-	// is now powered
-	if(!this->isPowered())
-	{
-//		Serial.println(String(millis())+" - "+String(this->m_lastPowerTime) +" ("+String(millis() - this->m_lastPowerTime)+") > "+ String(this->m_powerFailureDelay));
-		// check delay
-		if(millis() - this->m_lastPowerTime > this->m_powerFailureDelay)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
+  // is now powered
+  if(!this->isPowered())
+  {
+    // check delay
+    if((long)(millis() - (this->m_lastPowerTime + this->m_settings->getPowerFailureDelay())) >= 0 )
+    {
+      return true;
+    }
+  }
 
-	return false;
+  return false;
 }
 
-Contact **ResourcesManager::getContactList(void)
+void ResourcesManager::sendSms(String _message, bool _start)
 {
-	return this->m_contactList;
+  INFO("Send to all");
+  if(_start)
+  {
+    this->getNokia()->on();
+    this->getNokia()->ensureReady();
+  }
+  // send message to each contact
+  Contact ** contactList = this->getSettings()->getContactList();
+  for(int i=0; i<CONTACT_MAX_COUNT; i++)
+  {
+   if(contactList[i] != NULL)
+   {
+     this->getNokia()->sendSms(contactList[i]->getNumber(), _message);
+   }
+  }
+  if(_start)
+  {
+    this->getNokia()->off();
+  }
+}
+
+void ResourcesManager::sendAlert()
+{
+  INFO("Sending alert");
+
+  int powerFailureCount = this->getSettings()->getPowerFailureCount();
+  bool isPowered = this->isPowered();
+  float voltage = this->getPowerVoltage();
+
+  int battery;
+
+  if(voltage > 8.5)
+  {
+    battery = 3;
+  }
+  else
+    if(voltage > 8)
+    {
+      battery = 2;
+    }
+    else
+      if(voltage > 7)
+      {
+        battery = 1;
+      }
+      else
+      {
+        battery = 0;
+      }
+
+  String batString = "";
+  String powered = "No";
+  if(isPowered)
+  {
+    powered = "Yes";
+  }
+  else
+  {
+    batString = String("\nBat ")+battery+"/3";
+  }
+  String message = String("Alert(count ")+ powerFailureCount +")\nPowered "+ powered +batString;
+  this->sendSms(message, true);
+
+}
+
+Stream * ResourcesManager::getFbusIo()
+{
+  return this->m_fbusIo;
 }
 
 
 ResourcesManager::~ResourcesManager() {
-	// TODO Auto-generated destructor stub
+  // TODO Auto-generated destructor stub
 }
 

@@ -1,69 +1,100 @@
 
 #include "PowerFailureAlarm.h"
 #include "Nokia3310.h"
+#include "Led.h"
 #include "ResourcesManager.h"
-#include "Contact.h"
+#include "EmbeddedSettings.h"
+#include "Logger.h"
+#include "Tools.h"
+#define MODULE_ID 0
 
-ResourcesManager m_resourcesManager;
-Nokia3310 m_nokia;
+
+
+ResourcesManager *m_resourcesManager;
 
 void setup()   {
-  Serial.begin(115200);
-//  delay(2000);
-//  Contact v(1);
-//  int i;
-//  for(i=0;i<127;i++)
-//  {
-  //  Nokia3310::n61Handler(0,'U');
-//  }
-//  delay(2000);
-  //Nokia3310 * nokia = new Nokia3310();
-//  delay(2000);
-//  Serial.print("===>");
-//  Serial.println(millis());
-  //nokia->smsSend("0687672875", "salut");
-
-//  Contact::testRw();
-
-//  m_resourcesManager.testRw();
-
-  m_resourcesManager.load();
-  pinMode(PIN_POWER_FAILURE_LED, OUTPUT);
-
+ m_resourcesManager = new ResourcesManager();
+// m_resourcesManager->getSettings()->print();
+// m_resourcesManager->getSettings()->defaultValues();
 }
+
 
 
 
 void loop()
 {
+  bool failure = false;
+  unsigned long failureTime = 0;
   while(1)
   {
-	  m_resourcesManager.update();
-	  if(! m_resourcesManager.isPowered()) // if not powered
-	  {
-//		  Serial.println("Not powered");
-		  digitalWrite(PIN_POWER_FAILURE_LED, HIGH);
+    Stream *inputStream = NULL;
+  inputStream =m_resourcesManager->getLogIo();
+    if(inputStream->available())
+        {
+          char c = inputStream->read();
+          switch (c) {
+          case '0':
+            m_resourcesManager->getNokia()->on();
+            m_resourcesManager->getNokia()->ensureReady();
+            break;
+          case '1':
+          {
+            m_resourcesManager->sendSms("Test at "+ String(millis()) +"ms", true );
+            break;
+          }
+          case '2':
+            m_resourcesManager->getNokia()->off();
+            break;
+          case '3':
+            m_resourcesManager->getSettings()->defaultValues();
+              break;
+          case '4':
+            m_resourcesManager->print();
+            break;
+          case '5':
+            m_resourcesManager->sendAlert();
+            break;
+          case '6':
+            m_resourcesManager->getNokia()->sendSms("33687672875","nazdar " + String(millis()), true);
+            break;
+          case 'h':
+            ERROR("0 NokiaOn\n1 smsTest\n2 nokiaOff\n3 defaultValues\n4 status\n5 alert\n? help");
+          break;
+          default:
+            WARNING("unknown "+String(c));
+            break;
+        }
+
+        }
+    m_resourcesManager->getStatusLed()->blink(1000);
+    m_resourcesManager->update();
+    if(! m_resourcesManager->isPowered()) // if not powered
+    {
+      m_resourcesManager->getStatusLed()->blink(LED_FAILURE_BLINK_TIME);
 
 
-		  if(m_resourcesManager.powerFailure() && !m_resourcesManager.getRaised()) // if not powered and not raised
-		  {
-			  m_resourcesManager.raised();
-			  m_resourcesManager.print();
-			  // send message to each contact
-			 for(int i=0; i<CONTACT_MAX_COUNT; i++)
-			 {
-				 Contact ** contact = m_resourcesManager.getContactList();
-				 contact[i]->load();
-				 m_nokia.sendSms(contact[i]->getNumber(), "Power alert" + contact[i]->getName());
-				 contact[i]->unload();
-			 }
-		  }
-	  }
-	  else
-	  {
-//		  Serial.println("powered");
-		  digitalWrite(PIN_POWER_FAILURE_LED, LOW);
-	  }
-	  delay(100);
+      if(m_resourcesManager->powerFailure() && !m_resourcesManager->getRaised()) // if not powered and not raised
+      {
+        m_resourcesManager->getStatusLed()->on();
+        failureTime = millis();
+        failure = true;
+        m_resourcesManager->raised();
+        m_resourcesManager->sendAlert();
+
+      }
+    }
+    else
+    {
+      if( failure )
+      {
+          failure = false;
+          String time = Tools::print_time(millis() - failureTime);
+
+          String message = "Power back "+String(time);
+          m_resourcesManager->sendSms(message, true);
+          m_resourcesManager->getStatusLed()->off();
+      }
+    }
+    delay(100);
   }
 }

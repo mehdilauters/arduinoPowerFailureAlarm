@@ -29,17 +29,13 @@ void Contact::save(void)
 
 
 
-void Contact::load(void)
+bool Contact::load(void)
 {
-	this->m_name = Tools::EEPROMreadString(this->m_id * CONTACT_MAX_SIZE + CONTACT_OFFSET, CONTACT_MAX_NAME_SIZE );
-	this->m_number = Tools::EEPROMreadString(this->m_id * CONTACT_MAX_SIZE + CONTACT_MAX_NAME_SIZE + CONTACT_OFFSET, CONTACT_MAX_NUMBER_SIZE );
+	this->m_name = Tools::EEPROMreadString(		this->m_id * CONTACT_MAX_SIZE + CONTACT_OFFSET, CONTACT_MAX_NAME_SIZE );
+	this->m_number = Tools::EEPROMreadString(	this->m_id * CONTACT_MAX_SIZE + CONTACT_OFFSET+ CONTACT_MAX_NAME_SIZE, CONTACT_MAX_NUMBER_SIZE );
+	return this->m_name != "" && this->m_number != "";
 }
 
-void Contact::unload(void)
-{
-	this->m_name = "";
-	this->m_number = "";
-}
 
 String Contact::getName()
 {

@@ -14,11 +14,38 @@
     #include "WProgram.h"
 #endif
 
-#define CONTACT_MAX_COUNT 3
+#include "PowerFailureAlarmComon.h"
+
+#define LOG_LEVEL LOG_LEVEL_WARNING
+
+
+
+
+//#define DEBUG_WAIT_FOR_LOGGER
+
 #define CONTACT_OFFSET (sizeof(int)*2)
 #define RESOURCES_OFFSET 0
 
-#define PIN_POWER 2
-#define PIN_POWER_FAILURE_LED 13
+#define PIN_NOKIA_CONTROLE 7
+#define PIN_MAIN_POWER 11
+#define PIN_POWER_LEVEL A11
+#define PIN_LED 5
+
+// resistor bridge to read power voltage
+#define POWER_LEVEL_R1 320
+#define POWER_LEVEL_R2 320
+#define POWER_LEVEL_FACTOR ((float)1024 / ((float)POWER_LEVEL_R2/((float)POWER_LEVEL_R1 + (float)POWER_LEVEL_R2)))
+#define REFERENCE_VOLT 5
+
+#define SMS_SEND_NB_TRIES 3
+#define GETSMSC_NB_TRIES 3
+#define FBUS_NB_TRIES 3
+
+#define LED_FAILURE_BLINK_TIME 250
+
+
+#define FBUS_BAUDRATE 115200
+
+
 
 #endif /* POWERFAILUREALARM_H_ */
