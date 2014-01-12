@@ -23,7 +23,7 @@ private:
 	EmbeddedSettings * m_settings;
 	Nokia3310 * m_nokia;
 	Led * m_statusLed;
-	int m_lastPowerTime;
+	long m_lastPowerTime;
 	bool m_raised;
 public:
 	ResourcesManager();

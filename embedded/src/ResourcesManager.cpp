@@ -138,7 +138,7 @@ bool ResourcesManager::powerFailure(void)
   if(!this->isPowered())
   {
     // check delay
-    if((long)(millis() - (this->m_lastPowerTime + this->m_settings->getPowerFailureDelay())) >= 0 )
+    if((long)(millis() - ((long)this->m_lastPowerTime + (long)this->m_settings->getPowerFailureDelay() *(long)1000)) >= 0 )
     {
       return true;
     }
