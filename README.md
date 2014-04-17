@@ -45,3 +45,5 @@ embedded/src/EmbeddedSettings.cpp at void EmbeddedSettings::defaultValues(void)
 	make PowerFailureAlarm-upload
 
 Your alarm is ready to use
+
+Attention : because the sms library is not well debugged and arduino as a very small amount of RAM, sms with more than several words may leads to a reboot.
